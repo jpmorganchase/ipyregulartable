@@ -48,5 +48,21 @@ class DataModel(with_metaclass(ABCMeta)):
         """return column headers for data"""
         return [[str(_)] for _ in range(x0, x1)]
 
+    def sort(self, column, how):
+        """sort data by value.
+
+        Args:
+            column (int): column to sort
+            how (str): "asc", "desc", or ""
+        """
+    
+    def filter(self, column, how):
+        """filter data by value.
+
+        Args:
+            column (int): column to sort
+                how (str): fragment
+        """
+
     def write(self, x, y, value):
         """write event"""

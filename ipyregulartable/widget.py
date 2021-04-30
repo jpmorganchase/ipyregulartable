@@ -10,13 +10,13 @@ import pandas as pd
 from ipywidgets import DOMWidget, CallbackDispatcher
 from traitlets import (
     observe,
-    Instance,
-    Unicode,
-    Dict,
-    Bool,
-    Integer,
     validate,
+    Bool,
+    Dict,
+    Instance,
+    Integer,
     TraitError,
+    Unicode,
 )
 from .datamodel import (
     DataModel,
@@ -53,6 +53,9 @@ class RegularTableWidget(DOMWidget):
     datamodel = Instance(DataModel)
 
     height = Integer(default_value=250).tag(sync=True)
+
+    sort = Dict(default_value={}).tag(sync=True)
+    filter = Dict(default_value={}).tag(sync=True)
 
     css = Dict(default_value={}).tag(sync=True)
     styler = Dict(default_value={}).tag(sync=True)
@@ -127,6 +130,12 @@ class RegularTableWidget(DOMWidget):
         elif content.get("event", "") == "write":
             self.datamodel.write(*content.get("value", []))
             self.edit(content.get("value", ""))
+
+        elif content.get("event", "") == "sort":
+            self.datamodel.sort(*content.get("value", []))
+
+        elif content.get("event", "") == "filter":
+            self.datamodel.filter(*content.get("value", []))
 
         elif content.get("event", "") == "errors":
             self._jserrors(content.get("value", ""))

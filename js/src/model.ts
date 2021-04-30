@@ -89,6 +89,8 @@ class RegularTableModel extends DOMWidgetModel {
           style: [],
         },
       },
+      sort: {},
+      filter: {},
       _data: {},
       _editable: false,
     };

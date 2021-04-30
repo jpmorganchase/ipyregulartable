@@ -32,10 +32,14 @@ class RegularTableView extends DOMWidgetView {
   public selected = {x: 0, y: 0};
   public rows = 0;
   public columns = 0;
+  public sort_state = {};
 
   public render(): void {
     this.model.on("msg:custom", this._handle_msg, this);
     this.el.classList.add("ipyregulartable");
+
+    this.model.on("change:sort", this._handle_height, this);
+    this.model.on("change:filter", this._handle_height, this);
 
     this.model.on("change:height", this._handle_height, this);
 
@@ -251,6 +255,14 @@ class RegularTableView extends DOMWidgetView {
     this._handle_draw();
   }
 
+  public _handle_sort(): void {
+
+  }
+
+  public _handle_filter(): void {
+
+  }
+
   public _handle_msg(msg: any): void {
     if (msg.type === "draw") {
       this._handle_draw();
@@ -258,6 +270,10 @@ class RegularTableView extends DOMWidgetView {
       this._handle_data();
     } else if (msg.type === "editable") {
       this._handle_editable();
+    } else if (msg.type === "sort") {
+      this._handle_sort();
+    } else if (msg.type === "filter") {
+      this._handle_filter();
     }
   }
 
@@ -288,11 +304,18 @@ class RegularTableView extends DOMWidgetView {
 
     // hook in click events
     this.table.addEventListener("click", (event: MouseEvent) => {
+      console.log(event.target);
       const meta = this.table.getMeta(event.target);
-      this.selected.x = meta.x;
-      this.selected.y = meta.y;
-      this.updateFocus();
-      this.send({event: "click", value: [meta.x, meta.y]});
+
+      // is column header?
+      if (meta && meta.column_header_y) {
+        this.send({event: "click", value: [meta.x, "asc"]})
+      } else {
+        this.selected.x = meta.x;
+        this.selected.y = meta.y;
+        this.updateFocus();
+        this.send({event: "click", value: [meta.x, meta.y]});
+      }
     });
 
     // hook edit events into python
