@@ -14,6 +14,10 @@ import {evaluate} from "mathjs";
 
 import "regular-table";
 import "regular-table/dist/css/material.css";
+import "regular-table/dist/features/row_column_area_selection.css";
+import { addRowMouseSelection } from "regular-table/dist/features/row_mouse_selection";
+import { addColumnMouseSelection } from "regular-table/dist/features/column_mouse_selection";
+import { addAreaMouseSelection } from "regular-table/dist/features/area_mouse_selection";
 
 // Import the CSS
 import "../css/widget.css";
@@ -271,8 +275,8 @@ class RegularTableView extends DOMWidgetView {
     this.table = document.createElement("regular-table");
     this.el.appendChild(this.table);
 
-    // hook data model into python
-    this.table.setDataListener((x0: number, y0: number, x1: number, y1: number) => new Promise((resolve, reject) => {
+    // setup data listener
+    const dl = (x0: number, y0: number, x1: number, y1: number) => new Promise((resolve, reject) => {
       if (this.resolve !== undefined) {
         // existing outstanding promise
         this.reject();
@@ -284,7 +288,10 @@ class RegularTableView extends DOMWidgetView {
       this.resolve = resolve;
       this.reject = reject;
       this.send({event: "dataslice", value: [x0, y0, x1, y1]});
-    }));
+    });
+
+    // hook data model into python
+    this.table.setDataListener(dl);
 
     // hook in click events
     this.table.addEventListener("click", (event: MouseEvent) => {
@@ -317,6 +324,7 @@ class RegularTableView extends DOMWidgetView {
       });
     });
 
+    // move focused cell
     this.table.addEventListener("keydown", (event: KeyboardEvent) => {
       switch (event.keyCode) {
       // tab
@@ -351,10 +359,16 @@ class RegularTableView extends DOMWidgetView {
       }
     });
 
+    // update cell focus
     this.table.addEventListener("keyup", (event: KeyboardEvent) => {
       this.updateFocus();
       event.preventDefault();
     });
+
+    // Regular Table Plugins
+    addAreaMouseSelection(this.table);
+    addRowMouseSelection(this.table, dl);
+    addColumnMouseSelection(this.table, dl);
   }
 
   public moveSelection(dx: number, dy: number) {
